@@ -1,0 +1,1 @@
+<!-- A more compact single-column design --> 
