@@ -1,8 +1,9 @@
 import type { Carrier } from '~/types/shipping'
 
-const speedyOffices = {
+const speedyOffices: Carrier = {
   id: 'speedy',
-  name: 'Speedy Offices',
+  name: 'Speedy',
+  enabled: true,
   type: 'office',
   locations: [
     {
@@ -23,6 +24,6 @@ const speedyOffices = {
     }
     // Add more Speedy offices
   ]
-} satisfies Carrier
+}
 
 export default speedyOffices 

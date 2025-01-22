@@ -1,7 +1,4 @@
 import type { CountryConfig } from '~/types/shipping'
-import econtOffices from './carriers/econt'
-import samedayLockers from './carriers/sameday'
-import speedyOffices from './carriers/speedy'
 
 const config: CountryConfig = {
   locale: 'bg',
@@ -12,11 +9,9 @@ const config: CountryConfig = {
   shipping_methods: {
     door: {
       id: 'door',
-      name: 'До адрес'
-    },
-    econt: econtOffices,
-    sameday: samedayLockers,
-    speedy: speedyOffices
+      name: 'До адрес',
+      enabled: true
+    }
   },
   provinces: [
     { code: 'BG-01', name: 'Благоевград' },
@@ -50,9 +45,11 @@ const config: CountryConfig = {
   ],
   packages: {
     basic: {
-      name: 'Basic Package',
+      name: 'Основен пакет',
       regularPrice: 47.90,
       image: '/images/product1.webp',
+      shipping: 0,
+      freeDeliveryBadge: true,
       items: [
         {
           sku: '1023',
@@ -60,19 +57,15 @@ const config: CountryConfig = {
           qty: 1,
           price: 29.60
         }
-        // {
-        //   sku: 'WH-FILTER-01',
-        //   name: 'Standard Filter',
-        //   qty: 2,
-        //   price: 4.99
-        // }
       ]
     },
     standard: {
-      name: 'Standard Package',
+      name: 'Стандартен пакет',
       regularPrice: 95.80,
       image: '/images/product2.webp',
       badge: 'badge.bestSeller',
+      shipping: 0,
+      freeDeliveryBadge: true,
       items: [
         {
           sku: '1023',
@@ -83,9 +76,11 @@ const config: CountryConfig = {
       ]
     },
     extra: {
-      name: 'Extra Package',
+      name: 'Екстра пакет',
       regularPrice: 143.70,
       image: '/images/product3.webp',
+      shipping: 19.99,
+      freeDeliveryBadge: false,
       items: [
         {
           sku: '1023',
@@ -96,9 +91,11 @@ const config: CountryConfig = {
       ]
     },
     platinum: {
-      name: 'Platinum Package',
+      name: 'Платинен пакет',
       regularPrice: 191.60,
       image: '/images/product4+1.webp',
+      shipping: 0,
+      freeDeliveryBadge: true,
       items: [
         {
           sku: '1023',
@@ -108,13 +105,12 @@ const config: CountryConfig = {
         },
         {
           sku: '1023',
-          name: 'Free Wanderheat',
+          name: 'Безплатен Wanderheat',
           qty: 1,
           price: 0
         }
       ]
-    },
-    // ... other packages
+    }
   }
 }
 

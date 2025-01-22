@@ -12,13 +12,15 @@ export type CarrierType = 'office' | 'locker'
 export type Carrier = {
   id: string
   name: string
-  type: 'office' | 'locker'
+  type: CarrierType
   locations: Location[]
+  enabled: boolean
 }
 
 export type DoorDelivery = {
   id: 'door'
   name: string
+  enabled: boolean
 }
 
 export type ShippingMethods = {
@@ -26,30 +28,43 @@ export type ShippingMethods = {
   [key: string]: DoorDelivery | Carrier
 }
 
-// Example usage in config:
-export type CountryConfig = {
+export interface ShippingMethod {
+  id: string
+  name: string
+  enabled: boolean
+}
+
+export interface Province {
+  code: string
+  name: string
+}
+
+export interface PackageItem {
+  sku: string
+  name: string
+  qty: number
+  price: number
+}
+
+export interface Package {
+  name: string
+  regularPrice: number
+  image: string
+  badge?: string
+  items: PackageItem[]
+  shipping: number
+  freeDeliveryBadge?: boolean
+}
+
+export interface CountryConfig {
   locale: string
   currency: string
   currencySymbol: string
   currencyPosition: 'prefix' | 'suffix'
   delivery_tax: number
   shipping_methods: ShippingMethods
-  provinces: Array<{
-    code: string
-    name: string
-  }>
+  provinces: Province[]
   packages: {
-    [key: string]: {
-      name: string
-      regularPrice: number
-      image: string
-      badge?: string
-      items: Array<{
-        sku: string
-        name: string
-        qty: number
-        price: number
-      }>
-    }
+    [key: string]: Package
   }
 } 

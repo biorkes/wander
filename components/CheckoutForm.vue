@@ -56,153 +56,73 @@
         <div class="space-y-2">
           <!-- Door Delivery -->
           <div class="flex items-center gap-3">
-            <input 
-              type="radio"
-              id="door"
-              value="door"
-              v-model="formData.shippingMethod"
-              class="text-red-500 focus:ring-red-500"
-            />
+            <div class="relative flex items-center">
+              <input 
+                type="radio"
+                id="door"
+                value="door"
+                v-model="formData.shippingMethod"
+                class="peer sr-only"
+              />
+              <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:border-[6px] transition-all"></div>
+            </div>
             <label for="door" class="text-sm text-gray-600">
               {{ localeStore.t('order.shippingDoor') }}
-            </label>
-          </div>
-
-          <!-- Econt Offices -->
-          <div class="flex items-center gap-3">
-            <input 
-              type="radio"
-              id="econt"
-              value="econt"
-              v-model="formData.shippingMethod"
-              class="text-red-500 focus:ring-red-500"
-            />
-            <label for="econt" class="text-sm text-gray-600">
-              {{ localeStore.t('order.shippingOffice') }} - Econt Express
-            </label>
-          </div>
-
-          <!-- Speedy Offices -->
-          <div class="flex items-center gap-3">
-            <input 
-              type="radio"
-              id="speedy"
-              value="speedy"
-              v-model="formData.shippingMethod"
-              class="text-red-500 focus:ring-red-500"
-            />
-            <label for="speedy" class="text-sm text-gray-600">
-              {{ localeStore.t('order.shippingOffice') }} - Speedy
-            </label>
-          </div>
-
-          <!-- Sameday Lockers -->
-          <div class="flex items-center gap-3">
-            <input 
-              type="radio"
-              id="sameday"
-              value="sameday"
-              v-model="formData.shippingMethod"
-              class="text-red-500 focus:ring-red-500"
-            />
-            <label for="sameday" class="text-sm text-gray-600">
-              {{ localeStore.t('order.shippingLocker') }} - Sameday
             </label>
           </div>
         </div>
       </div>
 
       <!-- Door delivery fields -->
-      <template v-if="!isOfficeShipping">
-        <FormInput
-          v-model="formData.address"
-          :label="localeStore.t('order.address')"
-          :error="errors.address"
-          :is-valid="isAddressValid"
-        />
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            {{ localeStore.t('order.province') }}
-          </label>
-          <select
-            v-model="formData.province"
-            class="w-full rounded-md border border-gray-300 p-2"
-            :class="{ 'border-red-500': errors.province }"
+      <FormInput
+        v-model="formData.address"
+        :label="localeStore.t('order.address')"
+        :error="errors.address"
+        :is-valid="isAddressValid"
+      />
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ localeStore.t('order.province') }}
+        </label>
+        <select
+          v-model="formData.province"
+          class="w-full rounded-md border border-gray-300 p-2"
+          :class="{ 'border-red-500': errors.province }"
+        >
+          <option value="">{{ localeStore.t('order.selectProvince') }}</option>
+          <option 
+            v-for="province in localeStore.config?.provinces" 
+            :key="province.code" 
+            :value="province.code"
           >
-            <option value="">{{ localeStore.t('order.selectProvince') }}</option>
-            <option 
-              v-for="province in localeStore.config?.provinces" 
-              :key="province.code" 
-              :value="province.code"
-            >
-              {{ province.name }}
-            </option>
-          </select>
-          <span v-if="errors.province" class="text-red-500 text-xs">
-            {{ errors.province }}
-          </span>
+            {{ province.name }}
+          </option>
+        </select>
+        <span v-if="errors.province" class="text-red-500 text-xs">
+          {{ errors.province }}
+        </span>
+      </div>
+      
+      <div class="flex gap-4">
+        <div class="w-[70%]">
+          <FormInput
+            v-model="formData.city"
+            :label="localeStore.t('order.city')"
+            :error="errors.city"
+            :is-valid="isCityValid"
+          />
         </div>
         
-        <div class="flex gap-4">
-          <div class="w-[70%]">
-            <FormInput
-              v-model="formData.city"
-              :label="localeStore.t('order.city')"
-              :error="errors.city"
-              :is-valid="isCityValid"
-            />
-          </div>
-          
-          <div class="w-[30%]">
-            <FormInput
-              v-model="formData.zip"
-              :label="localeStore.t('order.zip')"
-              :error="errors.zip"
-              :is-valid="isZipValid"
-            />
-          </div>
+        <div class="w-[30%]">
+          <FormInput
+            v-model="formData.zip"
+            :label="localeStore.t('order.zip')"
+            :error="errors.zip"
+            :is-valid="isZipValid"
+          />
         </div>
-      </template>
-
-      <!-- Office/Locker Location Selection -->
-      <template v-else>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            {{ localeStore.t('order.chooseLocation') }}
-          </label>
-          <div v-if="carrierLocations" class="space-y-4">
-            <select
-              v-model="formData.selectedOffice"
-              class="w-full rounded-md border border-gray-300 p-2"
-              :class="{ 'border-red-500': errors.selectedOffice }"
-            >
-              <option value="">{{ localeStore.t('order.selectLocation') }}</option>
-              <option 
-                v-for="location in carrierLocations.locations" 
-                :key="location.id" 
-                :value="location.id"
-              >
-                {{ location.name }}
-              </option>
-            </select>
-            
-            <!-- Selected Location Details -->
-            <div v-if="selectedLocationDetails" class="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-              <div class="font-medium mb-1">{{ selectedLocationDetails.name }}</div>
-              <div>{{ selectedLocationDetails.address }}</div>
-              <div>{{ selectedLocationDetails.city }}, {{ selectedLocationDetails.zip }}</div>
-            </div>
-
-            <span v-if="errors.selectedOffice" class="text-red-500 text-xs">
-              {{ localeStore.t('order.locationRequired') }}
-            </span>
-          </div>
-          <div v-else class="text-gray-500 text-sm">
-            {{ localeStore.t('common.loading') }}
-          </div>
-        </div>
-      </template>
+      </div>
 
       <FormInput
         v-model="formData.email"
@@ -217,13 +137,16 @@
           {{ localeStore.t('order.payment') }}
         </label>
         <div class="flex items-center gap-3">
-          <input 
-            type="radio" 
-            id="cod" 
-            value="cod"
-            v-model="formData.paymentMethod"
-            class="text-red-500 focus:ring-red-500"
-          />
+          <div class="relative flex items-center">
+            <input 
+              type="radio" 
+              id="cod" 
+              value="cod"
+              v-model="formData.paymentMethod"
+              class="peer sr-only"
+            />
+            <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:border-[6px] transition-all"></div>
+          </div>
           <label for="cod" class="text-sm text-gray-600 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -240,6 +163,49 @@
         :error="errors.terms"
       />
 
+      <!-- Order Summary -->
+      <div class="border rounded-md p-4 bg-gray-50">
+        <h3 class="font-medium text-gray-900 mb-3">{{ localeStore.t('order.summary') }}</h3>
+        
+        <!-- Packages -->
+        <div class="space-y-2 mb-4">
+          <div v-for="pkg in cartStore.items" :key="pkg.id" class="flex justify-between text-sm">
+            <div>
+              <span class="font-medium">{{ pkg.name }}</span>
+              <span v-if="pkg.shipping === 0 && pkg.freeDeliveryBadge" 
+                class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                {{ localeStore.t('order.freeDelivery') }}
+              </span>
+            </div>
+            <span>{{ formatPrice(pkg.items.reduce((total, item) => total + item.price, 0)) }}</span>
+          </div>
+        </div>
+
+        <!-- Subtotal -->
+        <div class="flex justify-between text-sm mb-2">
+          <span>{{ localeStore.t('order.subtotal') }}</span>
+          <span>{{ formatPrice(cartStore.subtotal) }}</span>
+        </div>
+
+        <!-- Shipping -->
+        <div class="flex justify-between text-sm mb-2">
+          <span>{{ localeStore.t('order.shippingCost') }}</span>
+          <span>{{ formatPrice(cartStore.shippingCost) }}</span>
+        </div>
+
+        <!-- Discount -->
+        <div v-if="cartStore.appliedCoupon" class="flex justify-between text-sm text-green-600 mb-2">
+          <span>{{ localeStore.t('order.discount') }}</span>
+          <span>-{{ formatPrice(cartStore.discount) }}</span>
+        </div>
+
+        <!-- Total -->
+        <div class="flex justify-between font-medium text-lg mt-4 pt-4 border-t">
+          <span>{{ localeStore.t('order.total') }}</span>
+          <span>{{ formatPrice(cartStore.total) }}</span>
+        </div>
+      </div>
+
       <Button 
         type="submit"
         class="w-full bg-red-500 hover:bg-red-600 text-white"
@@ -252,176 +218,160 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { parsePhoneNumber, AsYouType } from 'libphonenumber-js'
 import { useLocaleStore } from '~/stores/locale'
 import { useCartStore } from '~/stores/cart'
-import { useChannelStore } from '~/stores/channel'
+import { useConfigStore } from '~/stores/config'
+import { usePackagesStore } from '~/stores/packages'
+import { useCouponsStore } from '~/stores/coupons'
 import Button from '~/components/common/Button.vue'
 import PhoneInput from '~/components/PhoneInput.vue'
 import FormInput from '~/components/FormInput.vue'
 import FormCheckbox from '~/components/FormCheckbox.vue'
-import type { Carrier } from '~/types/shipping'
+import type { ShippingMethod } from '~/types/shipping'
+import type { CountryCode } from 'libphonenumber-js'
 
 const router = useRouter()
 const localeStore = useLocaleStore()
 const cartStore = useCartStore()
-const channelStore = useChannelStore()
+const configStore = useConfigStore()
+const packagesStore = usePackagesStore()
+const couponsStore = useCouponsStore()
 
-const errors = reactive({
-  firstName: '',
-  lastName: '', 
-  phone: '',
-  address: '',
-  city: '',
-  province: '',
-  zip: '',
-  email: '',
-  terms: '',
-  selectedOffice: ''
-})
+interface FormData {
+  firstName: string
+  lastName: string
+  phone: string
+  address: string
+  city: string
+  province: string
+  zip: string
+  email: string
+  terms: boolean
+  shippingMethod: string
+  paymentMethod: string
+}
 
-const formData = reactive({
-  country_iso: computed(() => localeStore.currentLocale),
+interface FormErrors {
+  firstName?: string
+  lastName?: string
+  phone?: string
+  address?: string
+  city?: string
+  province?: string
+  zip?: string
+  email?: string
+  terms?: string
+}
+
+const formData = ref<FormData>({
   firstName: '',
   lastName: '',
   phone: '',
-  email: '',
   address: '',
   city: '',
   province: '',
   zip: '',
-  shippingMethod: 'door',
-  selectedOffice: '',
+  email: '',
   terms: false,
-  paymentMethod: 'cod',
-  channelCode: computed(() => channelStore.channelCode),
-  cart: computed(() => {
-    const allItems: Array<{ sku: string; name: string; qty: number; price: number }> = []
-    cartStore.items.forEach(pkg => {
-      pkg.items.forEach(item => {
-        allItems.push({
-          sku: item.sku,
-          name: item.name,
-          qty: item.qty,
-          price: item.price
-        })
-      })
-    })
-    return allItems
-  }),
-  subtotal: computed(() => cartStore.subtotal),
-  total: computed(() => cartStore.total),
-  deliveryTax: computed(() => localeStore.config?.delivery_tax || 0),
-  coupon: computed(() => {
-    if (!cartStore.appliedCoupon) return null
-    return {
-      code: cartStore.appliedCoupon.code,
-      type: cartStore.appliedCoupon.type,
-      value: cartStore.appliedCoupon.value,
-      discountAmount: cartStore.discount
-    }
-  })
+  shippingMethod: 'door',
+  paymentMethod: 'cod'
 })
 
-const isOfficeShipping = computed(() => {
-  const method = localeStore.config?.shipping_methods[formData.shippingMethod]
-  return method?.type === 'office' || method?.type === 'locker'
+const errors = ref<FormErrors>({})
+
+const subtotal = computed(() => cartStore.$state.items.reduce((total, pkg) => {
+  return total + pkg.items.reduce((pkgTotal, item) => pkgTotal + item.price * item.qty, 0)
+}, 0))
+
+const discount = computed(() => {
+  if (!cartStore.$state.appliedCoupon) return 0
+  return cartStore.$state.appliedCoupon.value
 })
 
-const availableShippingMethods = computed(() => {
-  const methods = localeStore.config?.shipping_methods || { door: { id: 'door', name: 'Delivery' } }
-  return Object.values(methods)
+const total = computed(() => subtotal.value - discount.value)
+
+const selectedShippingMethod = computed(() => {
+  return configStore.shipping_methods[formData.value.shippingMethod] as ShippingMethod
 })
+
+const isOfficeShipping = computed(() => false)
 
 const phoneInputRef = ref()
 const orderError = ref('')
 const isSubmitting = ref(false)
 
 // Validation states
-const isNameValid = computed(() => formData.firstName.trim().length > 0)
-const isLastNameValid = computed(() => formData.lastName.trim().length > 0)
-const isAddressValid = computed(() => !isOfficeShipping.value && formData.address.trim().length > 0)
-const isCityValid = computed(() => !isOfficeShipping.value && formData.city.trim().length > 0)
-const isZipValid = computed(() => !isOfficeShipping.value && formData.zip.trim().length > 0)
-const isEmailValid = computed(() => formData.email.includes('@'))
+const isNameValid = computed(() => formData.value.firstName.trim().length > 0)
+const isLastNameValid = computed(() => formData.value.lastName.trim().length > 0)
+const isAddressValid = computed(() => formData.value.address.trim().length > 0)
+const isCityValid = computed(() => formData.value.city.trim().length > 0)
+const isZipValid = computed(() => formData.value.zip.trim().length > 0)
+const isEmailValid = computed(() => formData.value.email.includes('@'))
 
 // Phone formatting and validation
-const formatPhoneNumber = (value: string, countryCode: string) => {
-  try {
-    const formatter = new AsYouType(countryCode)
-    return formatter.input(value)
-  } catch {
-    return value
-  }
+const formatPhoneNumber = (phone: string) => {
+  return phone.replace(/[^0-9]/g, '')
 }
 
-watch(() => formData.phone, (newValue) => {
-  const countryCode = localeStore.currentLocale.toUpperCase()
-  formData.phone = formatPhoneNumber(newValue, countryCode)
+watch(() => formData.value.phone, (newValue) => {
+  formData.value.phone = formatPhoneNumber(newValue)
 })
 
 // Form validation
 const validateForm = () => {
   let isValid = true
-  
-  // Reset errors
-  Object.keys(errors).forEach(key => {
-    errors[key] = ''
-  })
+  errors.value = {}
 
   // Name validation
-  if (!formData.firstName.trim()) {
-    errors.firstName = 'First name is required'
+  if (!formData.value.firstName.trim()) {
+    errors.value.firstName = localeStore.t('validation.firstName')
     isValid = false
   }
 
-  if (!formData.lastName.trim()) {
-    errors.lastName = 'Last name is required'
+  if (!formData.value.lastName.trim()) {
+    errors.value.lastName = localeStore.t('validation.lastName')
     isValid = false
   }
 
   // Phone validation
-  if (!formData.phone) {
-    errors.phone = localeStore.t('order.invalidPhone')
+  if (!formData.value.phone) {
+    errors.value.phone = localeStore.t('validation.phone')
     isValid = false
   }
 
   // Email validation
-  if (!formData.email || !formData.email.includes('@')) {
-    errors.email = 'Valid email is required'
+  if (!formData.value.email || !formData.value.email.includes('@')) {
+    errors.value.email = localeStore.t('validation.email')
     isValid = false
   }
 
-  // Shipping validation
-  if (isOfficeShipping.value) {
-    if (!formData.selectedOffice) {
-      errors.selectedOffice = localeStore.t('order.locationRequired')
-      isValid = false
-    }
-  } else {
-    if (!formData.address.trim()) {
-      errors.address = 'Address is required'
-      isValid = false
-    }
-    if (!formData.city.trim()) {
-      errors.city = 'City is required'
-      isValid = false
-    }
-    if (!formData.province) {
-      errors.province = 'Province is required'
-      isValid = false
-    }
-    if (!formData.zip.trim()) {
-      errors.zip = 'ZIP code is required'
-      isValid = false
-    }
+  // Address validation
+  if (!formData.value.address.trim()) {
+    errors.value.address = localeStore.t('validation.address')
+    isValid = false
+  }
+
+  if (!formData.value.city.trim()) {
+    errors.value.city = localeStore.t('validation.city')
+    isValid = false
+  }
+
+  if (!formData.value.province) {
+    errors.value.province = localeStore.t('validation.province')
+    isValid = false
+  }
+
+  if (!formData.value.zip.trim()) {
+    errors.value.zip = localeStore.t('validation.zip')
+    isValid = false
   }
 
   // Terms validation
-  if (!formData.terms) {
-    errors.terms = localeStore.t('order.termsRequired')
+  if (!formData.value.terms) {
+    errors.value.terms = localeStore.t('validation.terms')
     isValid = false
   }
 
@@ -448,7 +398,7 @@ const submitOrder = async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData.value)
     })
 
     const data = await response.json()
@@ -466,113 +416,16 @@ const submitOrder = async () => {
   }
 }
 
-// Watch shipping method changes
-watch(() => formData.shippingMethod, () => {
-  formData.selectedOffice = ''
-  errors.selectedOffice = ''
+onMounted(async () => {
+  await packagesStore.initializePackages(localeStore.currentLocale)
+  await couponsStore.initializeCoupons(localeStore.currentLocale)
 })
 
-// Watch selectedOffice changes
-watch(() => formData.selectedOffice, (officeId) => {
-  if (officeId) {
-    const method = localeStore.config?.shipping_methods[formData.shippingMethod]
-    const location = method?.locations?.find(loc => loc.id === officeId)
-    if (location) {
-      formData.address = location.address
-      formData.city = location.city
-      formData.province = location.province
-      formData.zip = location.zip
-    }
-  }
-})
-
-// Dynamic imports for carriers
-const loadCarrierLocations = async (carrier: string, locale: string) => {
-  try {
-    const module = await import(`~/locales/${locale}/carriers/${carrier}.ts`)
-    return module.default as Carrier
-  } catch (error) {
-    console.error(`Failed to load carrier locations for ${carrier}:`, error)
-    return null
-  }
+// Format price helper
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat(localeStore.currentLocale, {
+    style: 'currency',
+    currency: localeStore.config?.currency || 'EUR'
+  }).format(price)
 }
-
-const carrierLocations = ref<Carrier | null>(null)
-
-// Watch for shipping method changes to load appropriate carrier locations
-watch(() => formData.shippingMethod, async (newMethod) => {
-  // Reset all address-related fields
-  formData.selectedOffice = ''
-  formData.address = ''
-  formData.city = ''
-  formData.province = ''
-  formData.zip = ''
-  errors.selectedOffice = ''
-  
-  if (newMethod && isOfficeShipping.value) {
-    carrierLocations.value = await loadCarrierLocations(newMethod, localeStore.currentLocale)
-  } else {
-    carrierLocations.value = null
-  }
-})
-
-// Computed property for selected location details
-const selectedLocationDetails = computed(() => {
-  if (!carrierLocations.value || !formData.selectedOffice) return null
-  
-  const location = carrierLocations.value.locations.find(
-    loc => loc.id === formData.selectedOffice
-  )
-  
-  if (!location) return null
-  
-  return {
-    name: location.name,
-    address: location.address,
-    city: location.city,
-    province: location.province,
-    zip: location.zip
-  }
-})
-
-// Update template section for location selection
-const template = `
-      <!-- Office/Locker Location Selection -->
-      <template v-else>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            {{ localeStore.t('order.chooseLocation') }}
-          </label>
-          <div v-if="carrierLocations" class="space-y-4">
-            <select
-              v-model="formData.selectedOffice"
-              class="w-full rounded-md border border-gray-300 p-2"
-              :class="{ 'border-red-500': errors.selectedOffice }"
-            >
-              <option value="">{{ localeStore.t('order.selectLocation') }}</option>
-              <option 
-                v-for="location in carrierLocations.locations" 
-                :key="location.id" 
-                :value="location.id"
-              >
-                {{ location.name }}
-              </option>
-            </select>
-            
-            <!-- Selected Location Details -->
-            <div v-if="selectedLocationDetails" class="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-              <div class="font-medium mb-1">{{ selectedLocationDetails.name }}</div>
-              <div>{{ selectedLocationDetails.address }}</div>
-              <div>{{ selectedLocationDetails.city }}, {{ selectedLocationDetails.zip }}</div>
-            </div>
-
-            <span v-if="errors.selectedOffice" class="text-red-500 text-xs">
-              {{ localeStore.t('order.locationRequired') }}
-            </span>
-          </div>
-          <div v-else class="text-gray-500 text-sm">
-            {{ localeStore.t('common.loading') }}
-          </div>
-        </div>
-      </template>`
 </script> 

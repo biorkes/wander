@@ -1,8 +1,9 @@
 import type { Carrier } from '~/types/shipping'
 
-const samedayLockers = {
+const samedayLockers: Carrier = {
   id: 'sameday',
-  name: 'Sameday Lockers',
+  name: 'Sameday',
+  enabled: true,
   type: 'locker',
   locations: [
     {
@@ -15,6 +16,6 @@ const samedayLockers = {
     }
     // Add more Sameday lockers
   ]
-}  satisfies Carrier
+}
 
 export default samedayLockers 

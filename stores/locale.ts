@@ -1,68 +1,49 @@
 import { defineStore } from 'pinia'
+import type { CountryConfig } from '~/types/shipping'
 
 // Import all translations and configs
+import bgConfig from '~/config/shipping/bg'
 import bgTranslations from '~/locales/bg/translations'
-import bgConfig from '~/locales/bg/config'
-import esTranslations from '~/locales/es/translations'
-import esConfig from '~/locales/es/config'
 import enTranslations from '~/locales/en/translations'
-import enConfig from '~/locales/en/config'
-import roTranslations from '~/locales/ro/translations'
-import roConfig from '~/locales/ro/config'
 
-interface PackageItem {
-  sku: string;
-  name: string;
-  qty: number;
-  price: number;
+interface MessageFormatObject {
+  body?: {
+    static?: string
+  }
 }
 
-interface Package {
-  name: string;
-  regularPrice: number;
-  image: string;
-  badge?: string;
-  items: PackageItem[];
+interface LocaleConfig extends CountryConfig {
+  translations: { [key: string]: string | MessageFormatObject }
 }
 
-interface CountryConfig {
-  locale: string;
-  currency: string;
-  currencySymbol: string;
-  currencyPosition: 'prefix' | 'suffix';
-  delivery_tax: number;
-  provinces: Array<{
-    code: string;
-    name: string;
-  }>;
-  packages: {
-    [key: string]: Package;
-  };
-}
-
-const countryConfigs: { [key: string]: CountryConfig & { translations: { [key: string]: string } } } = {
+const countryConfigs: { [key: string]: LocaleConfig } = {
   en: {
-    ...enConfig,
+    locale: 'en',
+    currency: 'USD',
+    currencySymbol: '$',
+    currencyPosition: 'prefix',
+    delivery_tax: 19.99,
+    shipping_methods: {
+      door: {
+        id: 'door',
+        name: 'To Address',
+        enabled: true
+      }
+    },
+    provinces: [],
+    packages: {},
     translations: enTranslations
   },
   bg: {
     ...bgConfig,
     translations: bgTranslations
-  },
-  es: {
-    ...esConfig,
-    translations: esTranslations
-  },
-  ro: {
-    ...roConfig,
-    translations: roTranslations
   }
 }
 
 export const useLocaleStore = defineStore('locale', {
   state: () => ({
     currentLocale: '',
-    config: null as (CountryConfig & { translations: { [key: string]: string } }) | null
+    config: null as LocaleConfig | null
   }),
   actions: {
     async initializeLocale() {
@@ -73,16 +54,37 @@ export const useLocaleStore = defineStore('locale', {
       }
     },
     setLocale(locale: string) {
+      console.log('Setting locale:', locale)
       if (countryConfigs[locale]) {
         this.currentLocale = locale
         this.config = countryConfigs[locale]
+        console.log('Loaded translations:', this.config.translations)
       } else {
         this.currentLocale = 'bg'
         this.config = countryConfigs['bg']
+        console.log('Fallback to BG translations:', this.config.translations)
       }
     },
     t(key: string): string {
-      return this.config?.translations[key] || key
+      if (!this.config?.translations) {
+        console.warn('No translations loaded for key:', key)
+        return key
+      }
+      const translation = this.config.translations[key]
+      if (!translation) {
+        console.warn('Missing translation for key:', key)
+        return key
+      }
+      // Handle both string and message format object cases
+      if (typeof translation === 'string') {
+        return translation
+      }
+      // If it's a message format object, return the static text
+      if (translation.body?.static) {
+        return translation.body.static
+      }
+      console.warn('Invalid translation format for key:', key)
+      return key
     },
     formatPrice(amount: number): string {
       if (!this.config) return `${amount}`

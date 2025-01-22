@@ -23,6 +23,7 @@ export default {
   'order.chooseLocation': 'Elige ubicación de entrega',
   'order.locationRequired': 'Por favor, selecciona una ubicación de entrega',
   'order.checkout': 'Finalizar compra',
+  'order.freeDelivery': 'Envío Gratis',
   
   'home.title': 'Bienvenido a WanderHeat',
   'home.subtitle': 'Tu socio de confianza en calefacción',

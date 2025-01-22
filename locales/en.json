@@ -1,0 +1,39 @@
+{
+  "welcome": "Welcome",
+  "slogan": "GET WARM Instantly!",
+  "subtitle": "Heat Your Home Fast and Effectively with This Portable Plug-In Device!",
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "cta": {
+    "buy_now": "Buy Now",
+    "learn_more": "Learn More"
+  },
+  "shipping": {
+    "door": "To Address",
+    "econt": "Econt",
+    "sameday": "Sameday",
+    "speedy": "Speedy"
+  },
+  "packages": {
+    "basic": {
+      "name": "Basic Package",
+      "description": "Perfect for small spaces"
+    },
+    "standard": {
+      "name": "Standard Package",
+      "description": "Most popular choice",
+      "badge": "Best Seller"
+    },
+    "extra": {
+      "name": "Extra Package",
+      "description": "For larger spaces"
+    },
+    "platinum": {
+      "name": "Platinum Package",
+      "description": "Maximum value"
+    }
+  }
+} 

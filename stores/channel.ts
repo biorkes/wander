@@ -1,41 +1,42 @@
 import { defineStore } from 'pinia'
-import { useProductCheck } from '~/composables/useProductCheck'
+import type { ProductInfo } from '~/types/product'
 
-interface ProductInfo {
-  isValid: boolean;
-  productData?: any;
+interface ChannelState {
+  channelCode: string
+  productInfo: ProductInfo | null
+  productValue: string
 }
 
 export const useChannelStore = defineStore('channel', {
-  persist: {
-    storage: typeof window !== 'undefined' ? localStorage : undefined
-  },
-  state: () => ({
+  state: (): ChannelState => ({
     channelCode: '',
-    productInfo: null as ProductInfo | null,
+    productInfo: null,
     productValue: ''
   }),
+
   actions: {
     async setChannelCode(code: string) {
       this.channelCode = code
-      
-      // Update productValue
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        const baseUrl = `http://${url.host}`
-        this.productValue = code ? `${baseUrl}/?ch=${code}` : baseUrl
-      }
+      await this.loadProductInfo()
+    },
 
-      const { checkProduct } = useProductCheck()
-      this.productInfo = await checkProduct(code)
+    async loadProductInfo() {
+      // Load product info based on channel code
+      // This would typically be an API call
+      this.productInfo = {
+        isValid: true,
+        // Add other product info properties
+      }
     },
 
     initializeProductValue() {
+      // Initialize product value based on URL parameters or other logic
       if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        const baseUrl = `http://${url.host}`
-        const chParam = url.searchParams.get('ch')
-        this.productValue = chParam ? `${baseUrl}/?ch=${chParam}` : baseUrl
+        const urlParams = new URLSearchParams(window.location.search)
+        const channelCode = urlParams.get('ch')
+        if (channelCode) {
+          this.setChannelCode(channelCode)
+        }
       }
     }
   }

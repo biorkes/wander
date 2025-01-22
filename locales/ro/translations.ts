@@ -23,6 +23,7 @@ export default {
   'order.chooseLocation': 'Alege locația de livrare',
   'order.locationRequired': 'Te rugăm să selectezi o locație de livrare',
   'order.checkout': 'Finalizare Comandă',
+  'order.freeDelivery': 'Livrare Gratuită',
   
   'home.title': 'Bine ați venit la WanderHeat',
   'home.subtitle': 'Partenerul dvs. de încredere în încălzire',

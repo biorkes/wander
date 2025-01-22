@@ -23,6 +23,7 @@ export default {
   'order.selectLocation': 'Select location',
   'order.chooseLocation': 'Choose delivery location',
   'order.locationRequired': 'Please select a delivery location',
+  'order.freeDelivery': 'Free Delivery',
   
   'home.title': 'Welcome to WanderHeat',
   'home.subtitle': 'Your Trusted Heating Partner',
