@@ -9,7 +9,7 @@ const packages: PackageConfig = {
     items: [
       {
         id: 'item1',
-        sku: 'WH-BASIC-1',
+        sku: '1023',
         name: 'Wanderheat',
         qty: 1,
         price: 29.99
@@ -17,7 +17,6 @@ const packages: PackageConfig = {
     ],
     shipping: 0,
     regularPrice: 50.99,
-    isDefault: true,
     freeDeliveryBadge: false
   },
   'premium': {
@@ -37,6 +36,7 @@ const packages: PackageConfig = {
     ],
     shipping: 9.99,
     regularPrice: 109.99,
+    isDefault: true,
     freeDeliveryBadge: false
   },
   'ultra': {

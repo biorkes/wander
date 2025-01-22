@@ -34,6 +34,8 @@ defineProps<{
 defineEmits<{
   'update:modelValue': [value: string]
 }>()
+
+defineExpose({})
 </script>
 
 <style scoped>

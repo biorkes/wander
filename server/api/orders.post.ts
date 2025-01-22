@@ -1,4 +1,5 @@
 import type { OrderData } from '~/types/order'
+import type { Package, PackageItem } from '~/types/packages'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -23,6 +24,17 @@ export default defineEventHandler(async (event) => {
 
     const body = await readBody<OrderData>(event)
     
+    console.log('Received order body:', body)
+    
+    // Validate required data
+    if (!body?.cart?.length) {
+      console.error('Invalid cart data:', { body, cart: body?.cart })
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid cart data'
+      })
+    }
+
     // External API configuration
     const API_URL = process.env.ORDERS_API_URL
     if (!API_URL) {
@@ -36,31 +48,22 @@ export default defineEventHandler(async (event) => {
     const cartItems = body.cart.map(item => ({
       id: item.sku,
       qty: item.qty,
-      price: item.price / item.qty
+      price: Number(item.price) / Number(item.qty)
     }))
-
-    // Get product value from channelCode (remove http/https/www)
-    const domain = process.env.DOMAIN || 'wanderheat.com'
-    let productValue
     
-    try {
-      // Try to parse as URL if it's a full URL
-      const url = new URL(body.channelCode)
-      const subdomainMatch = url.hostname.match(/^([^.]+)\.(.+)$/)
-      const channelValue = url.searchParams.get('ch')
-      
-      productValue = subdomainMatch
-        ? `${subdomainMatch[1]}.${domain}/?ch=${channelValue}`
-        : `${domain}/?ch=${channelValue}`
-    } catch {
-      // If not a valid URL, construct it from channelCode
-      productValue = `${domain}/?ch=${body.channelCode}`
+    if (cartItems.length === 0) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Cart is empty or invalid'
+      })
     }
+    
+    console.log('Formatted cart items:', cartItems)
     
     // Format data according to API requirements
     const formattedData = [{
-      country_iso: body.country_iso, // Get country from domain
-      page: productValue,
+      country_iso: body.country_iso,
+      page: `${process.env.DOMAIN || 'wanderheat.com'}/?ch=${body.channelCode}`,
       name: `${body.firstName} ${body.lastName}`,
       address: body.address,
       city: body.city,
@@ -71,42 +74,34 @@ export default defineEventHandler(async (event) => {
       delivery_tax: body.deliveryTax,
       total: body.total
     }]
+
     // Make request to external API
-    const response = await fetch(API_URL, {
+    const response = await $fetch<any>(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${process.env.ORDERS_AUTH_TOKEN}`
       },
-      body: JSON.stringify(formattedData)
+      body: formattedData
     })
-
-    const responseText = await response.text()
-    console.log('API Response:', {
-      status: response.status,
-      text: responseText,
-      formattedData
-    })
-
-    const data = responseText ? JSON.parse(responseText) : null
 
     // Check for API error response
-    if (data?.status === 'error') {
+    if (response?.status === 'error') {
       throw createError({
         statusCode: 400,
-        statusMessage: typeof data.message === 'object' 
-          ? Object.values(data.message).flat().join(', ')
-          : data.message
+        statusMessage: typeof response.message === 'object' 
+          ? Object.values(response.message).flat().join(', ')
+          : response.message
       })
     }
 
     // Check if we have a successful order with order_id
-    if (Array.isArray(data) && data[0]?.order_id && data[0]?.status === 'success') {
+    if (Array.isArray(response) && response[0]?.order_id && response[0]?.status === 'success') {
       return {
-        orderId: data[0].order_id,
+        orderId: response[0].order_id,
         status: 'success',
-        message: data[0].message
+        message: response[0].message
       }
     }
 

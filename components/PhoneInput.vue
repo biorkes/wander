@@ -4,7 +4,7 @@
       :value="modelValue"
       @input="handleInput"
       type="tel"
-      :placeholder="placeholder"
+      :placeholder="$t('input.phone.placeholder')"
       class="w-full rounded-md border border-gray-300 p-2"
       :class="{ 
         'border-red-500': error,
@@ -12,7 +12,7 @@
       }"
     />
     <span v-if="error" class="text-red-500 text-xs">
-      {{ error }}
+      {{ error || $t('input.phone.invalid') }}
     </span>
   </div>
 </template>
@@ -20,12 +20,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js'
+import type { CountryCode } from 'libphonenumber-js'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   modelValue: string
   error?: string
   placeholder?: string
-  country: string
+  country: CountryCode
 }>()
 
 const emit = defineEmits<{
@@ -36,7 +40,7 @@ const emit = defineEmits<{
 const isValid = computed(() => {
   try {
     if (!props.modelValue) return false
-    const phoneNumber = parsePhoneNumber(props.modelValue, props.country)
+    const phoneNumber = parsePhoneNumber(props.modelValue, { defaultCountry: props.country })
     return phoneNumber?.isValid() || false
   } catch {
     return false
@@ -45,21 +49,32 @@ const isValid = computed(() => {
 
 const handleInput = (event: Event) => {
   const input = event.target as HTMLInputElement
-  const value = input.value
+  let value = input.value
+  
+  // Ensure we keep the plus sign at the start if it exists
+  if (value.startsWith('+')) {
+    const digits = value.slice(1).replace(/[^\d\s()-]/g, '')
+    value = '+' + digits
+  } else {
+    // For numbers without plus, preserve leading zeros and only clean non-digit chars
+    value = value.replace(/[^\d\s()-]/g, '')
+  }
   
   try {
     // Format the number using libphonenumber-js
-    const phoneNumber = parsePhoneNumber(value, props.country)
-    if (phoneNumber) {
+    const phoneNumber = parsePhoneNumber(value, { defaultCountry: props.country })
+    if (phoneNumber?.isValid()) {
       const formattedNumber = phoneNumber.format('INTERNATIONAL')
       emit('update:modelValue', formattedNumber)
     } else {
-      // If parsing fails, use AsYouType formatter for partial numbers
+      // If parsing fails or number is invalid, use AsYouType formatter for partial numbers
       const formatter = new AsYouType(props.country)
       const formattedNumber = formatter.input(value)
       emit('update:modelValue', formattedNumber)
     }
   } catch (error) {
+    // If there's an error, at least emit the cleaned value
+    emit('update:modelValue', value)
     console.error('Phone formatting error:', error)
   }
 }

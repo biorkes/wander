@@ -315,21 +315,12 @@
     </section>
 
     <!-- Customer Reviews Section -->
-    <section class="py-20 relative overflow-hidden">
-      <!-- Decorative Background Elements -->
-      <div class="absolute inset-0 pointer-events-none">
-        <!-- Red Blob -->
-        <div class="absolute -top-20 -right-20 w-[600px] h-[600px] bg-gradient-to-br from-red-200 to-orange-100 rounded-full blur-3xl opacity-20 transform rotate-12"></div>
-        <!-- Orange Blob -->
-        <div class="absolute -bottom-20 -left-20 w-[600px] h-[600px] bg-gradient-to-tr from-orange-200 to-red-100 rounded-full blur-3xl opacity-20 transform -rotate-12"></div>
-        <!-- Center Glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-gradient-to-r from-red-100/30 via-orange-100/30 to-red-100/30 rounded-full blur-3xl opacity-30"></div>
-      </div>
-
+    <section class="py-20 relative overflow-hidden bg-gray-100">
       <div class="container mx-auto px-6 relative">
-        <h2 class="text-3xl font-bold text-center mb-12">Satisfied WanderHeat Customers</h2>
-        <div class="relative">
-          <ReviewsSlider />
+        <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 relative z-10">Satisfied WanderHeat Customers</h2>
+        <div class="relative max-w-4xl mx-auto">
+          <div class="absolute inset-0 backdrop-blur-sm rounded-xl"></div>
+          <ReviewsSlider class="relative z-10" />
         </div>
       </div>
     </section>
@@ -417,13 +408,13 @@
     <section class="py-20 bg-gray-50">
       <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Perfect for Any Space</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Living Room -->
           <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <img 
               src="/images/rooms/living-room.webp" 
               alt="Living Room" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Living Room</p>
@@ -435,7 +426,7 @@
             <img 
               src="/images/rooms/kids-room.webp" 
               alt="Kids Room" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Kids Room</p>
@@ -447,7 +438,7 @@
             <img 
               src="/images/rooms/garage.webp" 
               alt="Garage" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Garage</p>
@@ -459,7 +450,7 @@
             <img 
               src="/images/rooms/bedroom.webp" 
               alt="Bedroom" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Bedroom</p>
@@ -471,7 +462,7 @@
             <img 
               src="/images/rooms/dorm.webp" 
               alt="Dorm" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Dorm</p>
@@ -483,7 +474,7 @@
             <img 
               src="/images/rooms/office.webp" 
               alt="Office" 
-              class="w-full h-32 object-cover"
+              class="w-full h-64 object-cover"
             />
             <div class="p-4">
               <p class="font-semibold text-center">Office</p>

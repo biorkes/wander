@@ -19,20 +19,20 @@
           
           <!-- Product Image -->
           <div class="relative transform hover:scale-105 transition-transform duration-500">
-            <!-- <video 
+            <video 
               src="/images/product-hero-video.webm" 
               autoplay
               muted
               playsinline
               class="w-full h-auto rounded-lg"
               poster="/images/product-hero.webp"
-            > -->
+            >
               <img 
                 src="/images/product-hero.webp" 
                 alt="WanderHeat Portable Heater"
                 class="w-full h-auto rounded-lg"
               />
-            <!-- </video> -->
+            </video>
             <!-- Floating Elements -->
             <div class="absolute -top-4 -right-4 flex flex-col gap-2">
               <!-- Power Badge -->
@@ -126,4 +126,15 @@
 
 <script setup lang="ts">
 // No additional script needed for now
-</script> 
+defineExpose({})
+</script>
+
+<style scoped>
+.review-section {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.15) 0%, rgba(255, 0, 0, 0.05) 100%);
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 6px rgba(255, 0, 0, 0.1);
+}
+</style> 

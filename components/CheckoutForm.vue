@@ -232,6 +232,7 @@ import FormInput from '~/components/FormInput.vue'
 import FormCheckbox from '~/components/FormCheckbox.vue'
 import type { ShippingMethod } from '~/types/shipping'
 import type { CountryCode } from 'libphonenumber-js'
+import type { OrderData } from '~/types/order'
 
 const router = useRouter()
 const localeStore = useLocaleStore()
@@ -240,47 +241,33 @@ const configStore = useConfigStore()
 const packagesStore = usePackagesStore()
 const couponsStore = useCouponsStore()
 
-interface FormData {
-  firstName: string
-  lastName: string
-  phone: string
-  address: string
-  city: string
-  province: string
-  zip: string
-  email: string
-  terms: boolean
-  shippingMethod: string
-  paymentMethod: string
-}
-
-interface FormErrors {
-  firstName?: string
-  lastName?: string
-  phone?: string
-  address?: string
-  city?: string
-  province?: string
-  zip?: string
-  email?: string
-  terms?: string
-}
-
-const formData = ref<FormData>({
+const isSubmitting = ref(false)
+const orderError = ref('')
+const errors = ref({
   firstName: '',
   lastName: '',
   phone: '',
+  email: '',
   address: '',
   city: '',
   province: '',
   zip: '',
+  terms: ''
+})
+
+const formData = reactive({
+  firstName: '',
+  lastName: '',
+  phone: '',
   email: '',
+  address: '',
+  city: '',
+  province: '',
+  zip: '',
   terms: false,
   shippingMethod: 'door',
   paymentMethod: 'cod'
 })
-
-const errors = ref<FormErrors>({})
 
 const subtotal = computed(() => cartStore.$state.items.reduce((total, pkg) => {
   return total + pkg.items.reduce((pkgTotal, item) => pkgTotal + item.price * item.qty, 0)
@@ -294,83 +281,86 @@ const discount = computed(() => {
 const total = computed(() => subtotal.value - discount.value)
 
 const selectedShippingMethod = computed(() => {
-  return configStore.shipping_methods[formData.value.shippingMethod] as ShippingMethod
+  return configStore.shipping_methods[formData.shippingMethod] as ShippingMethod
 })
 
 const isOfficeShipping = computed(() => false)
 
 const phoneInputRef = ref()
-const orderError = ref('')
-const isSubmitting = ref(false)
 
 // Validation states
-const isNameValid = computed(() => formData.value.firstName.trim().length > 0)
-const isLastNameValid = computed(() => formData.value.lastName.trim().length > 0)
-const isAddressValid = computed(() => formData.value.address.trim().length > 0)
-const isCityValid = computed(() => formData.value.city.trim().length > 0)
-const isZipValid = computed(() => formData.value.zip.trim().length > 0)
-const isEmailValid = computed(() => formData.value.email.includes('@'))
+const isNameValid = computed(() => formData.firstName.trim().length > 0)
+const isLastNameValid = computed(() => formData.lastName.trim().length > 0)
+const isAddressValid = computed(() => formData.address.trim().length > 0)
+const isCityValid = computed(() => formData.city.trim().length > 0)
+const isZipValid = computed(() => formData.zip.trim().length > 0)
+const isEmailValid = computed(() => formData.email.includes('@'))
 
 // Phone formatting and validation
 const formatPhoneNumber = (phone: string) => {
   return phone.replace(/[^0-9]/g, '')
 }
 
-watch(() => formData.value.phone, (newValue) => {
-  formData.value.phone = formatPhoneNumber(newValue)
+watch(() => formData.phone, (newValue) => {
+  formData.phone = formatPhoneNumber(newValue)
 })
 
 // Form validation
 const validateForm = () => {
   let isValid = true
-  errors.value = {}
+  errors.value = {
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    province: '',
+    zip: '',
+    terms: ''
+  }
 
-  // Name validation
-  if (!formData.value.firstName.trim()) {
+  if (!formData.firstName.trim()) {
     errors.value.firstName = localeStore.t('validation.firstName')
     isValid = false
   }
 
-  if (!formData.value.lastName.trim()) {
+  if (!formData.lastName.trim()) {
     errors.value.lastName = localeStore.t('validation.lastName')
     isValid = false
   }
 
-  // Phone validation
-  if (!formData.value.phone) {
+  if (!formData.phone) {
     errors.value.phone = localeStore.t('validation.phone')
     isValid = false
   }
 
-  // Email validation
-  if (!formData.value.email || !formData.value.email.includes('@')) {
+  if (!formData.email || !formData.email.includes('@')) {
     errors.value.email = localeStore.t('validation.email')
     isValid = false
   }
 
-  // Address validation
-  if (!formData.value.address.trim()) {
+  if (!formData.address.trim()) {
     errors.value.address = localeStore.t('validation.address')
     isValid = false
   }
 
-  if (!formData.value.city.trim()) {
+  if (!formData.city.trim()) {
     errors.value.city = localeStore.t('validation.city')
     isValid = false
   }
 
-  if (!formData.value.province) {
+  if (!formData.province) {
     errors.value.province = localeStore.t('validation.province')
     isValid = false
   }
 
-  if (!formData.value.zip.trim()) {
+  if (!formData.zip.trim()) {
     errors.value.zip = localeStore.t('validation.zip')
     isValid = false
   }
 
-  // Terms validation
-  if (!formData.value.terms) {
+  if (!formData.terms) {
     errors.value.terms = localeStore.t('validation.terms')
     isValid = false
   }
@@ -384,33 +374,76 @@ const emit = defineEmits<{
 
 // Form submission
 const submitOrder = async () => {
-  if (!validateForm()) {
-    emit('formInvalid')
-    return
-  }
-
   try {
     isSubmitting.value = true
-    orderError.value = ''
     
-    const response = await fetch('/api/orders', {
+    // Validate form
+    if (!validateForm()) {
+      isSubmitting.value = false
+      return
+    }
+
+    // Prepare cart items in the format expected by the API
+    const cartItems = cartStore.items.flatMap(pkg => 
+      pkg.items.map(item => ({
+        sku: item.sku,
+        name: item.name,
+        qty: 1,
+        price: item.price
+      }))
+    )
+
+    // Prepare order data
+    const orderData: Omit<OrderData, 'coupon'> & { coupon?: OrderData['coupon'] } = {
+      // Customer info
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      email: formData.email,
+      
+      // Shipping info
+      shippingMethod: formData.shippingMethod,
+      address: formData.address,
+      city: formData.city,
+      province: formData.province,
+      zip: formData.zip,
+      country_iso: localeStore.currentLocale as CountryCode,
+      
+      // Order details
+      cart: cartItems,
+      subtotal: cartStore.subtotal,
+      total: cartStore.total,
+      deliveryTax: cartStore.shippingCost,
+      
+      // Additional info
+      channelCode: (configStore.config as any)?.channelCode || '',
+      paymentMethod: 'cod'
+    }
+
+    // Add coupon if applied and is a fixed/percent discount
+    if (cartStore.appliedCoupon && ['fixed', 'percent'].includes(cartStore.appliedCoupon.type)) {
+      orderData.coupon = {
+        code: cartStore.appliedCoupon.code,
+        type: cartStore.appliedCoupon.type as 'fixed' | 'percent',
+        value: cartStore.appliedCoupon.value,
+        discountAmount: cartStore.discount
+      }
+    }
+
+    // Submit order
+    const { orderId } = await $fetch<{ orderId: string }>('/api/orders', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData.value)
+      body: orderData
     })
 
-    const data = await response.json()
-    
-    if (response.ok && data.status === 'success' && data.orderId) {
-      router.push(`/order-confirmation/${data.orderId}`)
-    } else {
-      throw new Error(data.message || 'Order submission failed')
+    if (orderId) {
+      // Clear cart and redirect to success page
+      cartStore.clearCart()
+      router.push(`/order-confirmation/${orderId}`)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Order submission error:', error)
-    orderError.value = error instanceof Error ? error.message : 'Failed to submit order'
+    orderError.value = error?.data?.message || localeStore.t('order.error')
   } finally {
     isSubmitting.value = false
   }

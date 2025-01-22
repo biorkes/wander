@@ -81,7 +81,7 @@ export default {
   'cart.discountApplied': 'Приложена отстъпка',
   'cart.finalTotal': 'Крайна сума',
   'cart.addToCart': 'Добави в количката',
-  'cart.removeFromCart': 'Премахни от количката',
+  'cart.removeFromCart': 'Премахни',
   'cart.updateQuantity': 'Промени количеството',
   
   'badge.bestSeller': 'Най-продаван',
@@ -162,5 +162,9 @@ export default {
 
   'order.subtotal': 'Междинна сума',
   'order.shippingCost': 'Цена за доставка',
-  'order.total': 'Обща сума'
+  'order.total': 'Обща сума',
+
+  'input.phone.placeholder': 'Въведете телефонен номер',
+  'input.phone.invalid': 'Невалиден телефонен номер',
+  'input.phone.required': 'Телефонният номер е задължителен',
 } 

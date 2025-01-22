@@ -20,12 +20,14 @@
 <script setup lang="ts">
 defineProps<{
   modelValue: boolean
-  label: string
-  error?: string
   id: string
+  label?: string
+  error?: string
 }>()
 
 defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
+
+defineExpose({})
 </script> 
